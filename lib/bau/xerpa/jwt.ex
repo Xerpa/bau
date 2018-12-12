@@ -9,7 +9,39 @@ defmodule Bau.Xerpa.JWT do
           | {:sig_algo, map()}
           | {:claim_iss, String.t()}
 
-  @spec decode(String.t(), String.t() | [String.t()], String.t() | [String.t()], [option]) ::
+  @type key :: key1 | [key1]
+
+  @type key1 :: String.t()
+
+  @spec encode(map, key1, key1, [option]) :: {:ok, String.t()} | :error
+  def encode(claims, sig_key, enc_key, options \\ []) do
+    sig_key = JOSE.JWK.from_oct(sig_key)
+    enc_key = JOSE.JWK.from_oct(:base64url.decode(enc_key))
+    sig_algo = %{"alg" => Keyword.get(options, :sig_algo, @default_sig_algo)}
+    enc_algo = Keyword.get(options, :enc_algo, @default_enc_algo)
+
+    time_now = DateTime.to_unix(Keyword.get(options, :timestamp, DateTime.utc_now()))
+    expires_in = Keyword.get(options, :expires_in_secs, 3600)
+    iss_claim = Keyword.get(options, :claim_iss, @default_iss_claim)
+
+    claims =
+      claims
+      |> Map.put_new(:iss, iss_claim)
+      |> Map.put_new(:iat, time_now)
+      |> Map.put_new(:exp, time_now + expires_in)
+      |> Poison.encode!()
+
+    with {%{}, enc_payload = %{}} <- JOSE.JWE.block_encrypt(enc_key, claims, enc_algo),
+         {%{}, enc_binary} <- JOSE.JWE.compact(enc_payload),
+         {%{}, sig_payload = %{}} <- JOSE.JWS.sign(sig_key, enc_binary, sig_algo),
+         {%{}, sig_binary} <- JOSE.JWS.compact(sig_payload) do
+      {:ok, sig_binary}
+    else
+      _ -> :error
+    end
+  end
+
+  @spec decode(String.t(), key, key, [option]) ::
           {:ok, map}
           | {:error, :bad_signature}
           | {:error, :bad_encryption}
