@@ -62,7 +62,7 @@ defmodule Bau.Xerpa.JWT do
 
     with {:sig, {true, enc_data, %JOSE.JWS{}}} <-
            {:sig, JOSE.JWS.verify_strict(sig_key, [sig_algo], token)},
-         {:enc, {data, %JOSE.JWE{alg: ^enc_alg, enc: ^enc_meth}}} <-
+         {:enc, {data, %JOSE.JWE{alg: ^enc_alg, enc: ^enc_meth}}} when is_binary(data) <-
            {:enc, JOSE.JWE.block_decrypt(enc_key, enc_data)},
          {:json, {:ok, claims}} <- {:json, Poison.decode(data)},
          {_, {_, _, true}} <- {:claim, {:exp, claims, check_exp(claims, time_now)}},
