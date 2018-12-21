@@ -5,7 +5,7 @@ defmodule Bau.Xerpa.CeeLogFormatTest do
 
   test "log levels" do
     for {lvl_input, lvl_expected} <- [debug: "<7>", info: "<6>", warn: "<4>", error: "<3>"] do
-      {lvl, _msg} = logmsg(lvl_input, "foobar", :unused, [])
+      {lvl, _msg} = logmsg(lvl_input, "foobar")
       assert lvl_expected == lvl
     end
   end
