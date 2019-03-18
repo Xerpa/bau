@@ -16,6 +16,6 @@ defmodule Bau.MixProject do
   end
 
   defp deps do
-    [{:poison, "~> 3.1"}, {:jose, "~> 1.8.4"}]
+    [{:poison, "~> 3.1"}, {:jose, "~> 1.9.0"}]
   end
 end
