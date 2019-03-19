@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e
+
+currdir=$(dirname "$(realpath "$0")")
+
+. "$currdir/functions"
+
+if [ "$in_container" = true ]
+then
+  if [ -n "$xerpa_svc_xtra" ]
+  then MIX_ENV="$xerpa_svc_xtra"; export MIX_ENV; fi
+
+  exec env \
+       "$@"
+else
+  bau_locate_doca_root
+
+  if [ -n "$MIX_ENV" ]
+  then exec env xerpa_svc_xtra="$MIX_ENV" $doca_root/bin/in-container bau default "$@"
+  else exec $doca_root/bin/in-container bau default "$@"
+  fi
+fi
