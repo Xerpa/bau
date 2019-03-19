@@ -1,0 +1,11 @@
+#!/bin/sh
+
+bau_locate_doca_root () {
+  doca_root=${doca_root:-"$currdir/../../../doca"}
+
+  if [ ! -d "$doca_root" ]
+  then
+    echo doca project not find. define a variable doca_root to fix this
+    exit 1
+  fi
+}
