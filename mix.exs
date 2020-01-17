@@ -18,7 +18,8 @@ defmodule Bau.MixProject do
   defp deps do
     [
       {:poison, "~> 3.1"},
-      {:absinthe, ">= 1.4.0 and < 1.5.0"}
+      {:absinthe, ">= 1.4.0 and < 1.5.0"},
+      {:tesla, ">= 1.0.0 and < 2.0.0"}
     ]
   end
 end
