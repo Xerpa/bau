@@ -19,7 +19,8 @@ defmodule Bau.MixProject do
     [
       {:poison, "~> 3.1"},
       {:absinthe, ">= 1.4.0 and < 1.5.0"},
-      {:tesla, ">= 1.0.0 and < 2.0.0"}
+      {:tesla, ">= 1.0.0 and < 2.0.0"},
+      {:conduit, ">= 0.8.0 and < 0.13.0"}
     ]
   end
 end

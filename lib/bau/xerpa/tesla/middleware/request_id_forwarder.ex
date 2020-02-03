@@ -1,9 +1,10 @@
 defmodule Bau.Xerpa.Tesla.Middleware.RequestIdForwarder do
   @behaviour Tesla.Middleware
 
+  alias Bau.Xerpa.Tracing
+
   def call(env, next, _opts) do
-    with {true, dict} <- Process.get(:logger_metadata),
-         "" <> request_id <- Keyword.get(dict, :request_id) do
+    with "" <> request_id <- Tracing.get_request_id() do
       env
       |> Tesla.put_header("x-request-id", request_id)
       |> Tesla.run(next)
