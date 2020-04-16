@@ -7,9 +7,11 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSON do
 
   require Logger
 
-  def call(message, next, opts) do
+  def call(message, next, _opts) do
     request_id = get_header(message, "x-request-id")
     correlation_id = message.correlation_id
+    queue = message.source
+    exchange = get_header(message, "exchange")
 
     case Jason.decode(message.body) do
       {:ok, decoded} ->
@@ -23,7 +25,9 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSON do
 
         Logger.error("invalid json message. discarding.\n#{msg}",
           request_id: request_id,
-          correlation_id: correlation_id
+          correlation_id: correlation_id,
+          queue: queue,
+          exchange: exchange
         )
 
         nack(message)

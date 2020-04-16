@@ -29,9 +29,12 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
     invalid_payload = "{}}"
 
     msg =
-      %Message{correlation_id: "correlation-id"}
+      %Message{}
       |> Message.put_header("x-request-id", "request-id")
+      |> Message.put_header("exchange", "exchange")
       |> Message.put_body(invalid_payload)
+      |> Message.put_new_correlation_id("correlation-id")
+      |> Message.put_source("queue")
 
     next = fn _ -> raise "should not be called" end
 
@@ -52,5 +55,7 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
     assert logs =~ "(Jason.DecodeError) unexpected byte at position 2: 0x7D ('}')"
     assert logs =~ "request_id=request-id"
     assert logs =~ "correlation_id=correlation-id"
+    assert logs =~ "queue=queue"
+    assert logs =~ "exchange=exchange"
   end
 end
