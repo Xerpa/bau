@@ -47,7 +47,7 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
         ],
         fn ->
           out_msg = ParseJSON.call(msg, next, [])
-          assert out_msg == Message.nack(msg)
+          assert out_msg == %{msg | status: :reject}
         end
       )
 

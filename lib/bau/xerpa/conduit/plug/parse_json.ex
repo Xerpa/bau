@@ -30,7 +30,7 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSON do
           exchange: exchange
         )
 
-        nack(message)
+        %{message | status: :reject}
     end
   end
 end
