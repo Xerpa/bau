@@ -8,6 +8,19 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSON do
   require Logger
 
   def call(message, next, _opts) do
+    case message.content_type do
+      nil ->
+        attempt_decode(message, next)
+
+      "application/json" ->
+        attempt_decode(message, next)
+
+      _ ->
+        next.(message)
+    end
+  end
+
+  defp attempt_decode(message, next) do
     request_id = get_header(message, "x-request-id")
     correlation_id = message.correlation_id
     queue = message.source
