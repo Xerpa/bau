@@ -68,7 +68,7 @@ defmodule Bau.Xerpa.Conduit.Plug.Retry do
 
     message
     |> put_header("retries", retries + 1)
-    |> ack
+    |> ack()
     |> attempt(next, retries + 1, opts)
   end
 
