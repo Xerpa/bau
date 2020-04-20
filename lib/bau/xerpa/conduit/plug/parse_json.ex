@@ -9,9 +9,6 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSON do
 
   def call(message, next, _opts) do
     case message.content_type do
-      nil ->
-        attempt_decode(message, next)
-
       "application/json" ->
         attempt_decode(message, next)
 
