@@ -112,8 +112,15 @@ defmodule Bau.Xerpa.Enum do
       raise "Only `:string` and `:integer` are supported by our crazy macro"
     end
 
+    behaviour_or_using =
+      if {:__using__, 1} in Ecto.Type.__info__(:macros) do
+        quote(do: use(Ecto.Type))
+      else
+        quote(do: @behaviour(Ecto.Type))
+      end
+
     quote do
-      use Ecto.Type
+      unquote(behaviour_or_using)
 
       @type code_t :: String.t() | integer | nil
       @type ok_of(y) :: {:ok, y} | :error
