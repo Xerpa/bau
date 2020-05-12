@@ -7,13 +7,13 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSON do
 
   require Logger
 
-  def call(message, next, _opts) do
-    case message.content_type do
-      "application/json" ->
-        attempt_decode(message, next)
+  def call(message, next, opts) do
+    force? = Keyword.get(opts, :force, false)
 
-      _ ->
-        next.(message)
+    if force? or message.content_type == "application/json" do
+      attempt_decode(message, next)
+    else
+      next.(message)
     end
   end
 

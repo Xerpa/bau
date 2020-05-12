@@ -25,6 +25,29 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
     assert out_msg.status == :ack
   end
 
+  test "always attempts to parse if force = true" do
+    text_payload = "{}"
+    decoded_payload = %{}
+
+    msg =
+      %Message{}
+      |> Message.put_header("x-request-id", "request-id")
+      |> Message.put_header("exchange", "exchange")
+      |> Message.put_content_type("text/plain")
+      |> Message.put_body(text_payload)
+      |> Message.put_new_correlation_id("correlation-id")
+      |> Message.put_source("queue")
+
+    next = fn in_msg -> in_msg end
+
+    out_msg = ParseJSON.call(msg, next, force: true)
+
+    assert out_msg ==
+             msg
+             |> Message.put_body(decoded_payload)
+             |> Message.put_content_type("application/json")
+  end
+
   test "successfully parses" do
     decoded_payload = %{"key" => "value"}
     encoded_payload = Jason.encode!(decoded_payload)
