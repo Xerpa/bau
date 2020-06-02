@@ -39,7 +39,13 @@ defmodule Bau.Xerpa.Conduit.Plug.DeadLetter do
     broker = Keyword.get(opts, :broker)
     publish_to = Keyword.get(opts, :publish_to)
 
-    broker.publish(message, publish_to, opts)
+    original_routing_key =
+      Message.get_header(message, "x-original-routing-key") ||
+        Message.get_header(message, "routing_key")
+
+    message
+    |> put_header("x-original-routing-key", original_routing_key)
+    |> broker.publish(publish_to, opts)
 
     case action do
       :nack ->
