@@ -20,9 +20,29 @@ defmodule Bau.Xerpa.Conduit.Plug.DeadLetterTest do
     end
 
     test "it publishes the message to the dead letter destination and acks the message" do
-      assert %Message{status: :ack} = RejectDeadLetter.run(%Message{})
+      routing_key = "routing_key"
+      msg = Message.put_header(%Message{}, "routing_key", routing_key)
+      assert %Message{status: :ack} = RejectDeadLetter.run(msg)
 
-      assert_received {:publish, :error, %Message{}, broker: Broker, publish_to: :error}
+      assert_received {:publish, :error, dlq_msg = %Message{}, broker: Broker, publish_to: :error}
+      assert Message.get_header(dlq_msg, "routing_key") == routing_key
+      assert Message.get_header(dlq_msg, "x-original-routing-key") == routing_key
+    end
+
+    test "it preserves x-original-routing-key when present" do
+      routing_key = "routing_key"
+      original_routing_key = "original_routing_key"
+
+      msg =
+        %Message{}
+        |> Message.put_header("routing_key", routing_key)
+        |> Message.put_header("x-original-routing-key", original_routing_key)
+
+      assert %Message{status: :ack} = RejectDeadLetter.run(msg)
+
+      assert_received {:publish, :error, dlq_msg = %Message{}, broker: Broker, publish_to: :error}
+      assert Message.get_header(dlq_msg, "routing_key") == routing_key
+      assert Message.get_header(dlq_msg, "x-original-routing-key") == original_routing_key
     end
   end
 
@@ -40,6 +60,22 @@ defmodule Bau.Xerpa.Conduit.Plug.DeadLetterTest do
       assert %Message{status: :nack} = NackedDeadLetter.run(%Message{})
 
       assert_received {:publish, :error, %Message{}, broker: Broker, publish_to: :error}
+    end
+
+    test "it preserves x-original-routing-key when present" do
+      routing_key = "routing_key"
+      original_routing_key = "original_routing_key"
+
+      msg =
+        %Message{}
+        |> Message.put_header("routing_key", routing_key)
+        |> Message.put_header("x-original-routing-key", original_routing_key)
+
+      assert %Message{status: :nack} = NackedDeadLetter.run(msg)
+
+      assert_received {:publish, :error, dlq_msg = %Message{}, broker: Broker, publish_to: :error}
+      assert Message.get_header(dlq_msg, "routing_key") == routing_key
+      assert Message.get_header(dlq_msg, "x-original-routing-key") == original_routing_key
     end
   end
 
@@ -59,6 +95,24 @@ defmodule Bau.Xerpa.Conduit.Plug.DeadLetterTest do
       assert_received {:publish, :error, %Message{} = message, broker: Broker, publish_to: :error}
 
       assert Message.get_header(message, "exception") =~ "failure"
+    end
+
+    test "it preserves x-original-routing-key when present" do
+      routing_key = "routing_key"
+      original_routing_key = "original_routing_key"
+
+      msg =
+        %Message{}
+        |> Message.put_header("routing_key", routing_key)
+        |> Message.put_header("x-original-routing-key", original_routing_key)
+
+      assert_raise(RuntimeError, "failure", fn ->
+        ErroredDeadLetter.run(msg)
+      end)
+
+      assert_received {:publish, :error, dlq_msg = %Message{}, broker: Broker, publish_to: :error}
+      assert Message.get_header(dlq_msg, "routing_key") == routing_key
+      assert Message.get_header(dlq_msg, "x-original-routing-key") == original_routing_key
     end
   end
 
