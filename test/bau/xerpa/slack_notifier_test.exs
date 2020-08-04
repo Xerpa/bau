@@ -6,21 +6,17 @@ defmodule Bau.Xerpa.SlackNotifierTest do
   import Tesla.Mock
 
   test "notify a message" do
-    parent = self()
-
-    mock_global(fn %{method: :post, body: body} ->
-      send(parent, {:ok, body})
-
+    mock(fn %{method: :post, body: body} ->
       %Tesla.Env{
-        status: 200
+        status: 200,
+        body: body
       }
     end)
 
     message = "notifyme sir"
     webhook_url = "https://slackapi/webhook_url"
 
-    SlackNotifier.notify(message, webhook_url)
-    assert_receive {:ok, body}
+    {:ok, %{body: body}} = SlackNotifier.notify(message, webhook_url)
 
     assert Jason.decode!(body) == %{"text" => "notifyme sir"}
   end
