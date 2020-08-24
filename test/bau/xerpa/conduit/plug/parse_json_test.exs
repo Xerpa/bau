@@ -6,7 +6,27 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
 
   import ExUnit.CaptureLog
 
-  test "does not attempt decode if content-type != application/json" do
+  test "does not attempt to decode if already parsed" do
+    parsed_payload = %{"key" => :value}
+
+    msg =
+      %Message{}
+      |> Message.put_header("x-request-id", "request-id")
+      |> Message.put_header("exchange", "exchange")
+      |> Message.put_header("x-xerpa-bau-parsed-json", "true")
+      |> Message.put_content_type("application/json")
+      |> Message.put_body(parsed_payload)
+      |> Message.put_new_correlation_id("correlation-id")
+      |> Message.put_source("queue")
+
+    next = fn in_msg -> in_msg end
+
+    out_msg = ParseJSON.call(msg, next, [])
+    assert out_msg == msg
+    assert out_msg.status == :ack
+  end
+
+  test "does not attempt to decode if content-type != application/json" do
     text_payload = "{}}"
 
     msg =
@@ -46,6 +66,7 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
              msg
              |> Message.put_body(decoded_payload)
              |> Message.put_content_type("application/json")
+             |> Message.put_header("x-xerpa-bau-parsed-json", "true")
   end
 
   test "successfully parses" do
@@ -66,6 +87,7 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
              msg
              |> Message.put_body(decoded_payload)
              |> Message.put_content_type("application/json")
+             |> Message.put_header("x-xerpa-bau-parsed-json", "true")
   end
 
   test "parse failure" do
