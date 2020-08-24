@@ -1,0 +1,44 @@
+---
+
+stages:
+  - tests
+
+.test: &test-template
+  variables:
+    MIX_ENV: test
+  before_script:
+    - mix local.rebar --force
+    - mix local.hex --force
+    - mix deps.get --only test
+    - mix compile
+  script:
+    - mix test
+
+test-1.6:
+  <<: *test-template
+  stage: tests
+  image: elixir:1.6
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-1.6
+    paths:
+      - deps/
+
+test-1.7:
+  <<: *test-template
+  stage: tests
+  image: elixir:1.7
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-1.7
+    paths:
+      - deps/
+
+test-1.8:
+  <<: *test-template
+  stage: tests
+  image: elixir:1.8
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-1.8
+    paths:
+      - deps/
+
+...
