@@ -6,7 +6,7 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
 
   import ExUnit.CaptureLog
 
-  test "does not attempt to decode if already parseed" do
+  test "does not attempt to decode if already parsed" do
     parsed_payload = %{"key" => :value}
 
     msg =
