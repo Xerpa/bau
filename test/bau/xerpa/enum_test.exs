@@ -100,6 +100,15 @@ defmodule Bau.Xerpa.EnumTest do
     assert Poison.encode!(4) in audits
   end
 
+  test "Const implements Jason.Encoder" do
+    audits = Enum.map([v4() | Const.values()], &Jason.encode!/1)
+
+    assert Jason.encode!(1) in audits
+    assert Jason.encode!(2) in audits
+    assert Jason.encode!(3) in audits
+    assert Jason.encode!(4) in audits
+  end
+
   test "Const implements Inspect" do
     inspects = Enum.map([v4() | Const.values()], &inspect/1)
     assert "Bau.Xerpa.EnumTest.Const<v1>" in inspects
