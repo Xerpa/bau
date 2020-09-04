@@ -11,6 +11,13 @@ defmodule Bau.Xerpa.EnumTest do
     defvalue(:v4, 4, "valor 4", hidden: true)
   end
 
+  defmodule ConstString do
+    use Bau.Xerpa.Enum
+    ecto_type(:string)
+
+    defvalue(:v1, "sou uma string", "valor 1")
+  end
+
   defp v1, do: %Const{name: :v1, code: 1, translation: "valor 1"}
   defp v2, do: %Const{name: :v2, code: 2, translation: "valor 2"}
   defp v3, do: %Const{name: :v3, code: 3, translation: "valor 3"}
@@ -98,6 +105,11 @@ defmodule Bau.Xerpa.EnumTest do
     assert Poison.encode!(2) in audits
     assert Poison.encode!(3) in audits
     assert Poison.encode!(4) in audits
+  end
+
+  test "Const implements Jason.Encoder" do
+    assert Jason.encode!(v1()) == "1"
+    assert Jason.encode!(ConstString.v1()) == "\"sou uma string\""
   end
 
   test "Const implements Inspect" do
