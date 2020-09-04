@@ -11,6 +11,13 @@ defmodule Bau.Xerpa.EnumTest do
     defvalue(:v4, 4, "valor 4", hidden: true)
   end
 
+  defmodule ConstString do
+    use Bau.Xerpa.Enum
+    ecto_type(:string)
+
+    defvalue(:v1, "sou uma string", "valor 1")
+  end
+
   defp v1, do: %Const{name: :v1, code: 1, translation: "valor 1"}
   defp v2, do: %Const{name: :v2, code: 2, translation: "valor 2"}
   defp v3, do: %Const{name: :v3, code: 3, translation: "valor 3"}
@@ -101,12 +108,8 @@ defmodule Bau.Xerpa.EnumTest do
   end
 
   test "Const implements Jason.Encoder" do
-    audits = Enum.map([v4() | Const.values()], &Jason.encode!/1)
-
-    assert Jason.encode!(1) in audits
-    assert Jason.encode!(2) in audits
-    assert Jason.encode!(3) in audits
-    assert Jason.encode!(4) in audits
+    assert Jason.encode!(v1()) == "1"
+    assert Jason.encode!(ConstString.v1()) == "\"sou uma string\""
   end
 
   test "Const implements Inspect" do
