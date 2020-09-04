@@ -154,6 +154,18 @@ defmodule Bau.Xerpa.Enum do
         def encode(value, opts), do: Poison.Encoder.encode(value.code, opts)
       end
 
+      defimpl Jason.Encoder, for: unquote(mod) do
+        def encode(value, opts) do
+          cond do
+            is_integer(value.code) ->
+              Jason.Encode.integer(value.code)
+
+            is_binary(value.code) ->
+              Jason.Encode.string(value.code, opts)
+          end
+        end
+      end
+
       defimpl Inspect, for: unquote(mod) do
         def inspect(value, _) do
           "#{unquote(mod)}<#{value.name}>" |> String.trim_leading("Elixir.")
