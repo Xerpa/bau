@@ -6,14 +6,14 @@ defmodule Bau.Xerpa.Absinthe.Middleware.ExceptionHandlerTest do
 
     alias Bau.Xerpa.Absinthe.Middleware.ExceptionHandler
 
-    defp on_error_fn(resolution = %{context: %{echo_fn: echo_fn}}, exception) do
-      echo_fn.(resolution, exception)
+    defp on_error_fn(resolution = %{context: %{echo_fn: echo_fn}}, exception, stacktrace) do
+      echo_fn.(resolution, exception, stacktrace)
 
       resolution
     end
 
     def middleware(middleware, _field, %Absinthe.Type.Object{identifier: :query}) do
-      Enum.map(middleware, fn m -> ExceptionHandler.wrap(m, on_error: &on_error_fn/2) end)
+      Enum.map(middleware, fn m -> ExceptionHandler.wrap(m, on_error: &on_error_fn/3) end)
     end
 
     def middleware(middleware, _field, _object), do: middleware
@@ -44,8 +44,16 @@ defmodule Bau.Xerpa.Absinthe.Middleware.ExceptionHandlerTest do
   setup do
     this = self()
 
-    echo_fn = fn resolution, exception ->
-      send(this, {:called, %{resolution: resolution, exception: exception}})
+    echo_fn = fn resolution, exception, stacktrace ->
+      send(
+        this,
+        {:called,
+         %{
+           resolution: resolution,
+           exception: exception,
+           stacktrace: stacktrace
+         }}
+      )
     end
 
     {:ok, %{echo_fn: echo_fn}}
@@ -82,6 +90,13 @@ defmodule Bau.Xerpa.Absinthe.Middleware.ExceptionHandlerTest do
              ]
            }
 
-    assert_receive {:called, %{resolution: %Absinthe.Resolution{}, exception: %RuntimeError{}}}
+    assert_receive {:called,
+                    %{
+                      resolution: %Absinthe.Resolution{},
+                      exception: %RuntimeError{},
+                      stacktrace: stacktrace
+                    }}
+
+    assert "" <> _ = Exception.format_stacktrace(stacktrace)
   end
 end
