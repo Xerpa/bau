@@ -25,17 +25,38 @@ defmodule Bau.Xerpa.Absinthe.Middleware.ExceptionHandler do
   ... where `your_error_handler/2` has type `(%Absinthe.Resolution{}, term()) -> %Absinthe.Resolution{}`.
   """
 
+  defmacrop get_stacktrace() do
+    current_elixir_version = Version.parse!(System.version())
+    stacktrace_macro_version = Version.parse!("1.7.0")
+
+    if Version.compare(current_elixir_version, stacktrace_macro_version) == :lt do
+      quote do
+        System.stacktrace()
+      end
+    else
+      quote do
+        __STACKTRACE__
+      end
+    end
+  end
+
   @impl true
   def call(resolution, opts) do
     spec = Keyword.fetch!(opts, :spec)
-    on_error_fn = Keyword.get(opts, :on_error, fn resolution, _error -> resolution end)
+
+    on_error_fn =
+      Keyword.get(opts, :on_error, fn resolution, _error, _stacktrace ->
+        resolution
+      end)
 
     try do
       execute(spec, resolution)
     rescue
       error ->
+        stacktrace = get_stacktrace()
+
         resolution
-        |> on_error_fn.(error)
+        |> on_error_fn.(error, stacktrace)
         |> Absinthe.Resolution.put_result({:error, "internal server error"})
     end
   end
@@ -44,7 +65,7 @@ defmodule Bau.Xerpa.Absinthe.Middleware.ExceptionHandler do
     {__MODULE__, spec: spec}
   end
 
-  def wrap(spec, on_error: on_error_fn) when is_function(on_error_fn, 2) do
+  def wrap(spec, on_error: on_error_fn) when is_function(on_error_fn, 3) do
     {__MODULE__, spec: spec, on_error: on_error_fn}
   end
 

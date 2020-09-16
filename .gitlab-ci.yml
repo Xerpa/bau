@@ -41,4 +41,13 @@ test-1.8:
     paths:
       - deps/
 
+test-1.9:
+  <<: *test-template
+  stage: tests
+  image: elixir:1.9
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-1.9
+    paths:
+      - deps/
+
 ...
