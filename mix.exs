@@ -12,13 +12,17 @@ defmodule Bau.MixProject do
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       consolidate_protocols: Mix.env() != :test,
-      deps: deps(elixir_version)
+      deps: deps(elixir_version),
+      elixirc_paths: elixirc_paths(Mix.env())
     ]
   end
 
   def application do
     [extra_applications: [:logger]]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/bau/test_support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp deps(%Version{major: 1, minor: 6}) do
     [
