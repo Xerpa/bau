@@ -68,27 +68,27 @@ defmodule Bau.Xerpa.Absinthe.Middleware.ExceptionHandlerTest do
   end
 
   test "does not call handler on error response", %{echo_fn: echo_fn} do
-    assert Absinthe.run!("query { failure }", TestSchema, context: %{echo_fn: echo_fn}) == %{
+    assert %{
              data: %{"failure" => nil},
-             errors: [
-               %{locations: [%{column: 0, line: 1}], message: "some_error", path: ["failure"]}
-             ]
-           }
+             errors: [error]
+           } = Absinthe.run!("query { failure }", TestSchema, context: %{echo_fn: echo_fn})
+
+    assert %{locations: [%{column: _, line: _}], message: "some_error", path: ["failure"]} = error
 
     refute_receive {:called, _}
   end
 
   test "calls handler on unhandled exceptions", %{echo_fn: echo_fn} do
-    assert Absinthe.run!("query { exception }", TestSchema, context: %{echo_fn: echo_fn}) == %{
+    assert %{
              data: %{"exception" => nil},
-             errors: [
-               %{
-                 locations: [%{column: 0, line: 1}],
-                 message: "internal server error",
-                 path: ["exception"]
-               }
-             ]
-           }
+             errors: [error]
+           } = Absinthe.run!("query { exception }", TestSchema, context: %{echo_fn: echo_fn})
+
+    assert %{
+             locations: [%{column: _, line: _}],
+             message: "internal server error",
+             path: ["exception"]
+           } = error
 
     assert_receive {:called,
                     %{
