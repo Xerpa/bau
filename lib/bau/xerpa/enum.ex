@@ -119,6 +119,22 @@ defmodule Bau.Xerpa.Enum do
         quote(do: @behaviour(Ecto.Type))
       end
 
+    ecto3_plus? =
+      with {:ok, vsn} <- :application.get_key(:ecto, :vsn) do
+        vsn = List.to_string(vsn)
+        Version.match?(vsn, "~> 3.0")
+      else
+        _ -> false
+      end
+
+    ecto3_callbacks =
+      if ecto3_plus? do
+        quote do
+          def embed_as(_format), do: :self
+          def equal?(t1, t2), do: t1.name == t2.name
+        end
+      end
+
     quote do
       unquote(behaviour_or_using)
 
@@ -144,6 +160,8 @@ defmodule Bau.Xerpa.Enum do
 
       @spec load(code_t) :: ok_of(t)
       def load(code), do: cast(code)
+
+      unquote(ecto3_callbacks)
     end
   end
 

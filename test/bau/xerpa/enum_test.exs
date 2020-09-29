@@ -1,6 +1,10 @@
 defmodule Bau.Xerpa.EnumTest do
   use ExUnit.Case
 
+  alias Bau.TestSupport.EctoHelpers
+
+  @ecto3? EctoHelpers.ecto3?()
+
   defmodule Const do
     use Bau.Xerpa.Enum, name: "sbrébous"
     ecto_type(:integer)
@@ -118,5 +122,17 @@ defmodule Bau.Xerpa.EnumTest do
     assert "Bau.Xerpa.EnumTest.Const<v2>" in inspects
     assert "Bau.Xerpa.EnumTest.Const<v3>" in inspects
     assert "Bau.Xerpa.EnumTest.Const<v4>" in inspects
+  end
+
+  if @ecto3? do
+    test "Const implements Ecto.Type embed_as" do
+      assert Const.embed_as(:format) == :self
+    end
+
+    test "Const implements Ecto.Type equal?" do
+      assert Const.equal?(Const.v1(), Const.v1())
+      refute Const.equal?(Const.v1(), Const.v2())
+      refute Const.equal?(Const.v2(), Const.v1())
+    end
   end
 end
