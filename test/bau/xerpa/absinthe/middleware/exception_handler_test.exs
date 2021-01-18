@@ -1,6 +1,8 @@
 defmodule Bau.Xerpa.Absinthe.Middleware.ExceptionHandlerTest do
   use ExUnit.Case, async: true
 
+  Application.ensure_started(:telemetry)
+
   defmodule TestSchema do
     use Absinthe.Schema
 

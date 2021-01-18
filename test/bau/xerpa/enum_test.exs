@@ -102,18 +102,22 @@ defmodule Bau.Xerpa.EnumTest do
     assert {:ok, nil} == Const.dump(nil)
   end
 
-  test "Const implements Poison.Encoder" do
-    audits = Enum.map([v4() | Const.values()], &Poison.encode!/1)
+  if Code.ensure_loaded?(Poison) do
+    test "Const implements Poison.Encoder" do
+      audits = Enum.map([v4() | Const.values()], &Poison.encode!/1)
 
-    assert Poison.encode!(1) in audits
-    assert Poison.encode!(2) in audits
-    assert Poison.encode!(3) in audits
-    assert Poison.encode!(4) in audits
+      assert Poison.encode!(1) in audits
+      assert Poison.encode!(2) in audits
+      assert Poison.encode!(3) in audits
+      assert Poison.encode!(4) in audits
+    end
   end
 
-  test "Const implements Jason.Encoder" do
-    assert Jason.encode!(v1()) == "1"
-    assert Jason.encode!(ConstString.v1()) == "\"sou uma string\""
+  if Code.ensure_loaded?(Jason) do
+    test "Const implements Jason.Encoder" do
+      assert Jason.encode!(v1()) == "1"
+      assert Jason.encode!(ConstString.v1()) == "\"sou uma string\""
+    end
   end
 
   test "Const implements Inspect" do
