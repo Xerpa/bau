@@ -25,7 +25,7 @@ defmodule Bau.MixProject do
   defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
-	[
+    [
       {:absinthe, ">= 1.4.0 and < 2.0.0", optional: true},
       {:conduit, ">= 0.8.0 and < 0.13.0", optional: true},
       {:poison, "~> 3.1", optional: true},
@@ -36,13 +36,13 @@ defmodule Bau.MixProject do
 
   defp deps(%Version{major: 1, minor: 6}) do
     [
-      {:ecto, ">= 2.2.0 and < 3.0.0", optional: true},
+      {:ecto, ">= 2.2.0 and < 3.0.0", optional: true}
     ]
   end
 
   defp deps(%Version{}) do
     [
-      {:ecto, ">= 2.2.0 and < 4.0.0", optional: true},
+      {:ecto, ">= 2.2.0 and < 4.0.0", optional: true}
     ]
   end
 end

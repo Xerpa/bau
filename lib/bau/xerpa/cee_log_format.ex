@@ -41,7 +41,7 @@ defmodule Bau.Xerpa.CeeLogFormat do
 
     json_log = JSON.encode!(%{message: "#{level}@cee: #{xerpa_log}"})
 
-	"#{json_log}\n"
+    "#{json_log}\n"
   rescue
     _ ->
       "<2>ERROR FORMATTING MESSAGE: #{

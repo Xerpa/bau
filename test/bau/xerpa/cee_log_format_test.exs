@@ -64,7 +64,7 @@ defmodule Bau.Xerpa.CeeLogFormatTest do
     test "complex types" do
       {_, msg} = logmsg(:debug, "", [], map: %{}, list: [])
 
-	  assert %{"map" => "%{}", "list" => "[]"} == msg["xerpa"]
+      assert %{"map" => "%{}", "list" => "[]"} == msg["xerpa"]
     end
   end
 
@@ -80,7 +80,7 @@ defmodule Bau.Xerpa.CeeLogFormatTest do
   defp logmsg(level, msg, meta_data \\ [], xerpa_meta \\ []) do
     Process.put({CeeLogFormat, :metadata}, xerpa_meta)
     log_entry = CeeLogFormat.format(level, msg, :unused, meta_data)
-	%{"message" => message} = JSON.decode!(log_entry)
+    %{"message" => message} = JSON.decode!(log_entry)
     [level, "cee: " <> json] = String.split(message, ["@"], parts: 2)
     {level, JSON.decode!(json)}
   rescue
