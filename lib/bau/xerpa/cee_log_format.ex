@@ -1,4 +1,6 @@
 defmodule Bau.Xerpa.CeeLogFormat do
+  alias Bau.Xerpa.JSON
+
   @doc """
   formats an structured log using sd-daemon(3) log and rsyslog cee
   format [1]. the log message has the following structure:
@@ -23,11 +25,11 @@ defmodule Bau.Xerpa.CeeLogFormat do
         Process.get({__MODULE__, :metadata}, Application.get_env(:logger, :xerpa_metadata, []))
       )
 
-    jsonlog =
+    xerpa_log =
       %{msg: IO.iodata_to_binary(message)}
       |> Map.put(:meta, Map.new(metadata, &sanitize/1))
       |> Map.put(:xerpa, Map.new(xerpadata, &sanitize/1))
-      |> Poison.encode!()
+      |> JSON.encode!()
 
     level =
       case level do
@@ -37,7 +39,9 @@ defmodule Bau.Xerpa.CeeLogFormat do
         :error -> "<3>"
       end
 
-    "#{level}@cee: #{jsonlog}\n"
+    json_log = JSON.encode!(%{message: "#{level}@cee: #{xerpa_log}"})
+
+	"#{json_log}\n"
   rescue
     _ ->
       "<2>ERROR FORMATTING MESSAGE: #{
