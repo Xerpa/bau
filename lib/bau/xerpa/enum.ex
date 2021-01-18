@@ -1,7 +1,5 @@
 if Code.ensure_loaded?(Ecto) do
   defmodule Bau.Xerpa.Enum do
-    alias Bau.Xerpa.JSON
-
     @doc false
     defmacro __using__(opts) do
       type_name = Keyword.get(opts, :name)

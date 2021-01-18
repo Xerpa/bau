@@ -26,20 +26,9 @@ if Code.ensure_loaded?(Absinthe) do
     ... where `your_error_handler/2` has type `(%Absinthe.Resolution{}, term()) -> %Absinthe.Resolution{}`.
     """
 
-    defmacrop get_stacktrace() do
-      current_elixir_version = Version.parse!(System.version())
-      stacktrace_macro_version = Version.parse!("1.7.0")
+    alias Bau.Xerpa.Stacktrace
 
-      if Version.compare(current_elixir_version, stacktrace_macro_version) == :lt do
-        quote do
-          System.stacktrace()
-        end
-      else
-        quote do
-          __STACKTRACE__
-        end
-      end
-    end
+    require Bau.Xerpa.Stacktrace
 
     @impl true
     def call(resolution, opts) do
@@ -54,7 +43,7 @@ if Code.ensure_loaded?(Absinthe) do
         execute(spec, resolution)
       rescue
         error ->
-          stacktrace = get_stacktrace()
+          stacktrace = Stacktrace.get()
 
           resolution
           |> on_error_fn.(error, stacktrace)

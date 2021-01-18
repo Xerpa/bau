@@ -7,6 +7,10 @@ if Code.ensure_loaded?(Conduit) do
     we need this to emulate that behaviour...
     """
 
+    alias Bau.Xerpa.Stacktrace
+
+    require Bau.Xerpa.Stacktrace
+
     def init(opts) do
       # Fail if opts are missing
       _ = Keyword.fetch!(opts, :publish_to)
@@ -32,7 +36,7 @@ if Code.ensure_loaded?(Conduit) do
         |> put_header("exception", Exception.format(:error, error))
         |> reject(:reject, opts)
 
-        reraise error, System.stacktrace()
+        reraise error, Stacktrace.get()
     end
 
     @spec reject(Conduit.Message.t(), :nack | :reject, Keyword.t()) :: Conduit.Message.t()

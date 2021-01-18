@@ -1,6 +1,10 @@
 if Code.ensure_loaded?(Conduit) do
   defmodule Bau.Xerpa.Conduit.Plug.Retry do
     use Conduit.Plug.Builder
+
+    alias Bau.Xerpa.Stacktrace
+
+    require Bau.Xerpa.Stacktrace
     require Logger
 
     @moduledoc """
@@ -45,7 +49,7 @@ if Code.ensure_loaded?(Conduit) do
       end
     rescue
       error ->
-        retry(message, next, retries, error, System.stacktrace(), opts)
+        retry(message, next, retries, error, Stacktrace.get(), opts)
     end
 
     defp retry(message, _, retries, :nack, _, %{attempts: attempts})
