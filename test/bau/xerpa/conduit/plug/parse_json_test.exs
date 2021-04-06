@@ -19,11 +19,15 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
       |> Message.put_new_correlation_id("correlation-id")
       |> Message.put_source("queue")
 
-    next = fn in_msg -> in_msg end
+    next = fn in_msg ->
+      send(self(), :next_called)
+      in_msg
+    end
 
     out_msg = ParseJSON.call(msg, next, [])
     assert out_msg == msg
     assert out_msg.status == :ack
+    assert_receive :next_called
   end
 
   test "does not attempt to decode if content-type != application/json" do
@@ -38,11 +42,15 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
       |> Message.put_new_correlation_id("correlation-id")
       |> Message.put_source("queue")
 
-    next = fn in_msg -> in_msg end
+    next = fn in_msg ->
+      send(self(), :next_called)
+      in_msg
+    end
 
     out_msg = ParseJSON.call(msg, next, [])
     assert out_msg == msg
     assert out_msg.status == :ack
+    assert_receive :next_called
   end
 
   test "always attempts to parse if force = true" do
@@ -58,7 +66,10 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
       |> Message.put_new_correlation_id("correlation-id")
       |> Message.put_source("queue")
 
-    next = fn in_msg -> in_msg end
+    next = fn in_msg ->
+      send(self(), :next_called)
+      in_msg
+    end
 
     out_msg = ParseJSON.call(msg, next, force: true)
 
@@ -67,6 +78,8 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
              |> Message.put_body(decoded_payload)
              |> Message.put_content_type("application/json")
              |> Message.put_header("x-xerpa-bau-parsed-json", "true")
+
+    assert_receive :next_called
   end
 
   test "successfully parses" do
@@ -79,7 +92,10 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
       |> Message.put_content_type("application/json")
       |> Message.put_body(encoded_payload)
 
-    next = fn x -> x end
+    next = fn in_msg ->
+      send(self(), :next_called)
+      in_msg
+    end
 
     out_msg = ParseJSON.call(msg, next, [])
 
@@ -88,6 +104,8 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
              |> Message.put_body(decoded_payload)
              |> Message.put_content_type("application/json")
              |> Message.put_header("x-xerpa-bau-parsed-json", "true")
+
+    assert_receive :next_called
   end
 
   test "parse failure" do

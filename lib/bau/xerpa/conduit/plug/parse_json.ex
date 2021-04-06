@@ -28,7 +28,7 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSON do
     already_parsed? = get_header(message, @parsed_flag_header) == "true"
 
     if already_parsed? do
-      message
+      next.(message)
     else
       case Jason.decode(message.body) do
         {:ok, decoded} ->
