@@ -131,7 +131,7 @@ defmodule Bau.Xerpa.Enum do
       if ecto3_plus? do
         quote do
           def embed_as(_format), do: :self
-          def equal?(t1, t2), do: t1.name == t2.name
+          def equal?(t1, t2), do: t1 == t2
         end
       end
 
