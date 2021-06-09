@@ -7,12 +7,11 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSON do
 
   require Logger
 
-  @parsed_flag_header "x-xerpa-bau-parsed-json"
-
   def call(message, next, opts) do
-    force? = Keyword.get(opts, :force, false)
+    # to avoid pipeline order dependencies (dead letter + parse + format)
+    skip_parse_json? = Keyword.get(opts, :skip_parse_json?, false)
 
-    if force? or message.content_type == "application/json" do
+    if not skip_parse_json? and message.content_type == "application/json" do
       attempt_decode(message, next)
     else
       next.(message)
@@ -24,32 +23,25 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSON do
     correlation_id = message.correlation_id
     queue = message.source
     exchange = get_header(message, "exchange")
-    # to avoid pipeline order dependencies (dead letter + parse + format)
-    already_parsed? = get_header(message, @parsed_flag_header) == "true"
 
-    if already_parsed? do
-      next.(message)
-    else
-      case Jason.decode(message.body) do
-        {:ok, decoded} ->
-          message
-          |> put_content_type("application/json")
-          |> put_header(@parsed_flag_header, "true")
-          |> put_body(decoded)
-          |> next.()
+    case Jason.decode(message.body) do
+      {:ok, decoded} ->
+        message
+        |> put_content_type("application/json")
+        |> put_body(decoded)
+        |> next.()
 
-        {:error, error} ->
-          msg = Exception.format(:error, error)
+      {:error, error} ->
+        msg = Exception.format(:error, error)
 
-          Logger.error("invalid json message. discarding.\n#{msg}",
-            request_id: request_id,
-            correlation_id: correlation_id,
-            queue: queue,
-            exchange: exchange
-          )
+        Logger.error("invalid json message. discarding.\n#{msg}",
+          request_id: request_id,
+          correlation_id: correlation_id,
+          queue: queue,
+          exchange: exchange
+        )
 
-          %{message | status: :reject}
-      end
+        %{message | status: :reject}
     end
   end
 end
