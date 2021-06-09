@@ -45,7 +45,10 @@ defmodule Bau.Xerpa.Conduit.Plug.DeadLetter do
 
     message
     |> put_header("x-original-routing-key", original_routing_key)
-    |> broker.publish(publish_to, opts)
+    |> broker.publish(
+      publish_to,
+      Keyword.put(opts, :skip_parse_json?, true)
+    )
 
     case action do
       :nack ->
