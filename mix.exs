@@ -26,21 +26,21 @@ defmodule Bau.MixProject do
 
   defp deps(%Version{major: 1, minor: 6}) do
     [
-      {:absinthe, ">= 1.4.0 and < 2.0.0"},
-      {:conduit, ">= 0.8.0 and < 0.13.0"},
-      {:ecto, ">= 2.2.0 and < 3.0.0"},
-      {:poison, "~> 3.1"},
-      {:tesla, ">= 1.0.0 and < 2.0.0"}
+      {:absinthe, ">= 1.4.0 and < 2.0.0", optional: true},
+      {:conduit, ">= 0.8.0 and < 0.13.0", optional: true},
+      {:ecto, ">= 2.2.0 and < 3.0.0", optional: true},
+      {:poison, "~> 3.1", optional: true},
+      {:tesla, ">= 1.0.0 and < 2.0.0", optional: true}
     ]
   end
 
   defp deps(%Version{}) do
     [
-      {:absinthe, ">= 1.4.0 and < 2.0.0"},
-      {:conduit, ">= 0.8.0 and < 0.13.0"},
-      {:ecto, ">= 2.2.0 and < 4.0.0"},
-      {:poison, "~> 3.1"},
-      {:tesla, ">= 1.0.0 and < 2.0.0"}
+      {:absinthe, ">= 1.4.0 and < 2.0.0", optional: true},
+      {:conduit, ">= 0.8.0 and < 0.13.0", optional: true},
+      {:ecto, ">= 2.2.0 and < 4.0.0", optional: true},
+      {:poison, "~> 3.1", optional: true},
+      {:tesla, ">= 1.0.0 and < 2.0.0", optional: true}
     ]
   end
 end
