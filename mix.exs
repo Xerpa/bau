@@ -30,7 +30,9 @@ defmodule Bau.MixProject do
       {:conduit, ">= 0.8.0 and < 0.13.0", optional: true},
       {:ecto, ">= 2.2.0 and < 3.0.0", optional: true},
       {:poison, "~> 3.1", optional: true},
-      {:tesla, ">= 1.0.0 and < 2.0.0", optional: true}
+      {:tesla, ">= 1.0.0 and < 2.0.0", optional: true},
+      {:joken, "~> 2.3.0", optional: true},
+      {:joken_jwks, "~> 1.4.1", optional: true}
     ]
   end
 
