@@ -41,7 +41,7 @@ defmodule Bau.MixProject do
       {:ecto, ">= 2.2.0 and < 4.0.0", optional: true},
       {:poison, "~> 3.1", optional: true},
       {:tesla, ">= 1.0.0 and < 2.0.0", optional: true},
-      {:joken, ">= 2.3.0", optional: true},
+      {:joken, "~> 2.3.0", optional: true},
       {:joken_jwks, "~> 1.4.1", optional: true}
     ]
   end
