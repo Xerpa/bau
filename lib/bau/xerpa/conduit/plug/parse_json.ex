@@ -11,8 +11,9 @@ if Code.ensure_loaded?(Conduit) do
     def call(message, next, opts) do
       # to avoid pipeline order dependencies (dead letter + parse + format)
       skip_parse_json? = Keyword.get(opts, :skip_parse_json?, false)
+      force? = Keyword.get(opts, :force, false)
 
-      if not skip_parse_json? and message.content_type == "application/json" do
+      if not skip_parse_json? and (message.content_type == "application/json" or force?) do
         attempt_decode(message, next)
       else
         next.(message)

@@ -6,7 +6,7 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
 
   import ExUnit.CaptureLog
 
-  test "does not attempt to decode if set to skip" do
+  test "does not attempt to decode if set to skip even if force is true" do
     parsed_payload = %{"key" => :value}
 
     msg =
@@ -23,7 +23,12 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
       in_msg
     end
 
-    out_msg = ParseJSON.call(msg, next, skip_parse_json?: true)
+    out_msg =
+      ParseJSON.call(msg, next,
+        skip_parse_json?: true,
+        force?: true
+      )
+
     assert out_msg == msg
     assert out_msg.status == :ack
     assert_receive :next_called
@@ -110,5 +115,29 @@ defmodule Bau.Xerpa.Conduit.Plug.ParseJSONTest do
     assert logs =~ "correlation_id=correlation-id"
     assert logs =~ "queue=queue"
     assert logs =~ "exchange=exchange"
+  end
+
+  test "decode if content-type != application/json but force is true" do
+    decoded_payload = %{"key" => "value"}
+    encoded_payload = Jason.encode!(decoded_payload)
+
+    msg =
+      %Message{}
+      |> Message.put_header("x-request-id", "request-id")
+      |> Message.put_header("exchange", "exchange")
+      |> Message.put_content_type("text/plain")
+      |> Message.put_body(encoded_payload)
+      |> Message.put_new_correlation_id("correlation-id")
+      |> Message.put_source("queue")
+
+    next = fn in_msg ->
+      send(self(), :next_called)
+      in_msg
+    end
+
+    out_msg = ParseJSON.call(msg, next, force?: true)
+    assert out_msg == msg
+    assert out_msg.status == :ack
+    assert_receive :next_called
   end
 end
